@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Детектив: Кто подставил Ванька?</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            background: #0b0e1a;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .game-container {
+            max-width: 720px;
+            width: 100%;
+            background: #161b2b;
+            border-radius: 32px;
+            padding: 32px 28px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+            border: 1px solid #2d3555;
+            transition: all 0.2s;
+            min-height: 560px;
+            display: flex;
+            flex-direction: column;
+        }
+        .scene {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            animation: fadeUp 0.5s ease;
+        }
+        .scene.active {
+            display: flex;
+        }
+        @keyframes fadeUp {
+            0% { opacity: 0; transform: translateY(30px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        h1 {
+            font-size: 30px;
+            font-weight: 700;
+            color: #f7d44a;
+            text-align: center;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            text-shadow: 0 0 20px rgba(247, 212, 74, 0.2);
+        }
+        h2 {
+            font-size: 22px;
+            font-weight: 600;
+            color: #e0e6ff;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+        .subhead {
+            color: #a8b2d9;
+            text-align: center;
+            font-size: 16px;
+            margin-bottom: 20px;
+            padding: 0 6px;
+            line-height: 1.5;
+        }
+        .photo-block {
+            width: 100%;
+            background: #0f1422;
+            border-radius: 20px;
+            padding: 16px 16px 12px;
+            border: 1px solid #2e385a;
+            margin: 8px 0 12px;
+        }
+        .photo-label {
+            font-weight: 600;
+            font-size: 18px;
+            color: #f7d44a;
+            text-align: center;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+        .photo-placeholder {
+            width: 100%;
+            aspect-ratio: 16 / 10;
+            background: #1a2140;
+            border-radius: 14px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #33406a;
+            color: #6b7aaa;
+            font-size: 15px;
+        }
+        .photo-placeholder img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .description {
+            background: #101726;
+            border-radius: 16px;
+            padding: 16px 18px;
+            margin: 12px 0 18px;
+            border-left: 4px solid #f7d44a;
+            color: #cfd7f0;
+            font-size: 16px;
+            line-height: 1.6;
+            width: 100%;
+        }
+        .hint {
+            color: #8b9acf;
+            font-size: 14px;
+            font-style: italic;
+            margin-top: 6px;
+        }
+        .btn {
+            background: #f7d44a;
+            border: none;
+            border-radius: 60px;
+            padding: 14px 34px;
+            font-weight: 700;
+            font-size: 18px;
+            color: #0b0e1a;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 6px 0 #a07f1a;
+            width: fit-content;
+            min-width: 160px;
+            text-align: center;
+            letter-spacing: 0.5px;
+            margin: 6px 0;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 0 #a07f1a;
+            background: #ffe066;
+        }
+        .btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #a07f1a;
+        }
+        .btn-secondary {
+            background: #2e385a;
+            box-shadow: 0 6px 0 #1a2140;
+            color: #e0e6ff;
+        }
+        .btn-secondary:hover {
+            background: #3f4b78;
+            color: #fff;
+        }
+        .btn:disabled {
+            opacity: 0.4;
+            pointer-events: none;
+            transform: none;
+        }
+        .verdict-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+            width: 100%;
+            margin: 12px 0 10px;
+        }
+        .suspect-card {
+            background: #0f1422;
+            border-radius: 20px;
+            padding: 16px;
+            border: 1px solid #2e385a;
+            transition: all 0.2s;
+        }
+        .suspect-card .photo-placeholder {
+            aspect-ratio: 16 / 9;
+        }
+        .suspect-name {
+            font-weight: 700;
+            color: #f7d44a;
+            font-size: 20px;
+            text-align: center;
+            margin: 8px 0 10px;
+        }
+        .suspect-btn {
+            background: #2e385a;
+            border: none;
+            border-radius: 40px;
+            padding: 12px 24px;
+            font-weight: 600;
+            color: #e0e6ff;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 16px;
+            width: 100%;
+            max-width: 180px;
+            margin: 4px auto 0;
+            display: block;
+            box-shadow: 0 4px 0 #1a2140;
+        }
+        .suspect-btn:hover:not(:disabled) {
+            background: #3f4b78;
+            transform: translateY(-2px);
+        }
+        .suspect-btn:active:not(:disabled) {
+            transform: translateY(4px);
+            box-shadow: 0 1px 0 #1a2140;
+        }
+        .suspect-btn:disabled {
+            opacity: 0.3;
+            pointer-events: none;
+        }
+        .result-box {
+            text-align: center;
+            width: 100%;
+            padding: 12px 0 4px;
+        }
+        .result-box .big-label {
+            font-size: 52px;
+            font-weight: 800;
+            letter-spacing: 4px;
+            text-shadow: 0 0 40px currentColor;
+            margin: 6px 0;
+        }
+        .result-box .result-message {
+            font-size: 18px;
+            padding: 12px 16px;
+            background: #101726;
+            border-radius: 16px;
+            border-left: 4px solid #f7d44a;
+            color: #cfd7f0;
+            margin: 12px 0 18px;
+        }
+        .gameover .big-label { color: #ff4757; }
+        .win .big-label { color: #2ed573; }
+        .flex-center {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-top: 8px;
+        }
+        .mt-2 { margin-top: 18px; }
+        .w-full { width: 100%; }
+        @media (max-width: 500px) {
+            .game-container { padding: 20px 16px; }
+            h1 { font-size: 24px; }
+            .btn { min-width: 130px; padding: 12px 24px; font-size: 16px; }
+        }
+        @media (max-width: 380px) {
+            .game-container { padding: 16px 12px; }
+            h1 { font-size: 20px; }
+            .btn { min-width: 100px; padding: 10px 16px; font-size: 14px; }
+            .suspect-btn { font-size: 14px; padding: 10px 16px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-container" id="app">
+
+    <!-- ===== СЦЕНА 0: СТАРТ ===== -->
+    <div class="scene active" id="scene-start">
+        <h1>🕵️ ДЕТЕКТИВНОЕ РАССЛЕДОВАНИЕ</h1>
+        <div class="subhead">Кто подставил Ванька?<br />Разберись в этом деле.</div>
+        <div style="height: 20px;"></div>
+        <button class="btn" id="btn-start">🔍 Начать расследование</button>
+    </div>
+
+    <!-- ===== СЦЕНА 1: ВАНЬОК ===== -->
+    <div class="scene" id="scene-1">
+        <h2>📋 Дело №1</h2>
+        <div class="photo-block">
+            <div class="photo-label">Ваньок</div>
+            <div class="photo-placeholder">
+                <img src="1.jpg" alt="Ваньок" />
+            </div>
+        </div>
+        <div class="description">
+            Уважаемого человека подставили: ему подкинули пистолет и 2 кг порошка. Ваньок утверждает, что он невиновен.
+            <div class="hint">💡 Тебе предстоит допросить трёх подозреваемых и вынести вердикт.</div>
+        </div>
+        <button class="btn btn-secondary" data-next="scene-2">Продолжить ➜</button>
+    </div>
+
+    <!-- ===== СЦЕНА 2: СЛЕНДЕР ===== -->
+    <div class="scene" id="scene-2">
+        <h2>🔎 Первый подозреваемый</h2>
+        <div class="photo-block">
+            <div class="photo-label">Слендер</div>
+            <div class="photo-placeholder">
+                <img src="2.jpg" alt="Слендер" />
+            </div>
+        </div>
+        <div class="description">
+            <strong>Слендер</strong> — лох полный, мутный, лысый. Сказал, что понятия не имеет, кто это сделал.
+            <div class="hint">💡 Выглядит подозрительно, но это слишком очевидно?</div>
+        </div>
+        <button class="btn btn-secondary" data-next="scene-3">Продолжить ➜</button>
+    </div>
+
+    <!-- ===== СЦЕНА 3: ПЕТРУШКА ===== -->
+    <div class="scene" id="scene-3">
+        <h2>🔎 Второй подозреваемый</h2>
+        <div class="photo-block">
+            <div class="photo-label">Петрушка</div>
+            <div class="photo-placeholder">
+                <img src="3.jpg" alt="Петрушка" />
+            </div>
+        </div>
+        <div class="description">
+            <strong>Петрушка</strong> — нефор, качок. Шпулил шпулю. Говорит, что это Слендер.
+            <div class="hint">💡 Сваливает вину на другого — типичный манёвр.</div>
+        </div>
+        <button class="btn btn-secondary" data-next="scene-4">Продолжить ➜</button>
+    </div>
+
+    <!-- ===== СЦЕНА 4: БРАТ ВАНЬКА ===== -->
+    <div class="scene" id="scene-4">
+        <h2>🔎 Третий подозреваемый</h2>
+        <div class="photo-block">
+            <div class="photo-label">Брат Ванька</div>
+            <div class="photo-placeholder">
+                <img src="4.jpg" alt="Брат Ванька" />
+            </div>
+        </div>
+        <div class="description">
+            <strong>Брат-близнец Ванька Титана</strong>. Говорит, что не при делах и это всё они.
+            <div class="hint">💡 Брат-близнец — классический подозреваемый в детективах.</div>
+        </div>
+        <button class="btn" id="btn-verdict">⚖️ Вынести вердикт</button>
+    </div>
+
+    <!-- ===== СЦЕНА 5: ВЕРДИКТ ===== -->
+    <div class="scene" id="scene-verdict">
+        <h2>⚖️ ВЫНЕСЕНИЕ ВЕРДИКТА</h2>
+        <div class="subhead">Кто же подставил Ванька? Выбери виновного.</div>
+        <div class="verdict-grid">
+            <div class="suspect-card">
+                <div class="photo-placeholder">
+                    <img src="2.jpg" alt="Слендер" />
+                </div>
+                <div class="suspect-name">Слендер</div>
+                <button class="suspect-btn" data-suspect="slender">Посадить</button>
+            </div>
+            <div class="suspect-card">
+                <div class="photo-placeholder">
+                    <img src="3.jpg" alt="Петрушка" />
+                </div>
+                <div class="suspect-name">Петрушка</div>
+                <button class="suspect-btn" data-suspect="petrushka">Посадить</button>
+            </div>
+            <div class="suspect-card">
+                <div class="photo-placeholder">
+                    <img src="4.jpg" alt="Брат Ванька" />
+                </div>
+                <div class="suspect-name">Брат Ванька</div>
+                <button class="suspect-btn" data-suspect="brother">Посадить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== СЦЕНА 6: РЕЗУЛЬТАТ ===== -->
+    <div class="scene" id="scene-result">
+        <div class="result-box" id="result-box">
+            <div class="big-label" id="result-label">WIN</div>
+            <div class="photo-placeholder" style="max-width: 400px; margin: 0 auto; aspect-ratio: 16/10;">
+                <img src="win.jpg" alt="result" id="result-img" />
+            </div>
+            <div class="result-message" id="result-message"></div>
+            <button class="btn" id="btn-restart">🔄 Начать заново</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // ============================================================
+    //  🔊 ЗВУКОВАЯ СИСТЕМА
+    // ============================================================
+
+    class SoundManager {
+        constructor() {
+            this.ctx = null;
+            this.initialized = false;
+            this.bgAudio = null;
+            this.musicVolume = 0.3;
+        }
+
+        init() {
+            if (this.initialized) return;
+            this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+            this.initialized = true;
+            this.startBackgroundMusic();
+        }
+
+        startBackgroundMusic() {
+            try {
+                this.bgAudio = new Audio('background.mp3');
+                this.bgAudio.loop = true;
+                this.bgAudio.volume = this.musicVolume;
+                this.bgAudio.play();
+                console.log('🎵 Музыка запущена');
+            } catch (e) {
+                console.warn('❌ Музыка не загружена:', e);
+            }
+        }
+
+        stopBackgroundMusic() {
+            try {
+                if (this.bgAudio) {
+                    this.bgAudio.pause();
+                    this.bgAudio.currentTime = 0;
+                }
+            } catch (e) {}
+        }
+
+        playTone(freq, dur, type = 'sine', vol = 0.3) {
+            if (!this.initialized) return;
+            try {
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = type;
+                osc.frequency.value = freq;
+                gain.gain.setValueAtTime(vol, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + dur);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(this.ctx.currentTime);
+                osc.stop(this.ctx.currentTime + dur);
+            } catch (e) {}
+        }
+
+        click() { this.playTone(600, 0.08, 'sine', 0.2); }
+        transition() { this.playTone(800, 0.12, 'sine', 0.15); setTimeout(() => this.playTone(1000, 0.12, 'sine', 0.15), 120); }
+        win() { const notes = [523, 659, 784, 1047]; notes.forEach((freq, i) => { setTimeout(() => this.playTone(freq, 0.25, 'sine', 0.25), i * 150); }); }
+        lose() { const notes = [400, 350, 300, 250]; notes.forEach((freq, i) => { setTimeout(() => this.playTone(freq, 0.3, 'sawtooth', 0.2), i * 180); }); }
+        verdict() { this.playTone(300, 0.5, 'sawtooth', 0.2); setTimeout(() => this.playTone(200, 0.5, 'sawtooth', 0.2), 300); }
+    }
+
+    // ============================================================
+    //  🎮 ОСНОВНАЯ ЛОГИКА
+    // ============================================================
+
+    (function() {
+        const sound = new SoundManager();
+        document.addEventListener('click', () => sound.init(), { once: true });
+
+        const scenes = document.querySelectorAll('.scene');
+
+        function showScene(id) {
+            scenes.forEach(s => s.classList.remove('active'));
+            const target = document.getElementById(id);
+            if (target) target.classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            sound.transition();
+        }
+
+        document.getElementById('btn-start').addEventListener('click', () => {
+            sound.click();
+            showScene('scene-1');
+        });
+
+        document.querySelectorAll('[data-next]').forEach(btn => {
+            btn.addEventListener('click', function() {
+                sound.click();
+                const next = this.getAttribute('data-next');
+                if (next) showScene(next);
+            });
+        });
+
+        document.getElementById('btn-verdict').addEventListener('click', () => {
+            sound.verdict();
+            showScene('scene-verdict');
+        });
+
+        const suspectBtns = document.querySelectorAll('.suspect-btn');
+        const resultLabel = document.getElementById('result-label');
+        const resultMsg = document.getElementById('result-message');
+        const resultImg = document.getElementById('result-img');
+        const resultBox = document.getElementById('result-box');
+
+        function showResult(type, photoUrl, message) {
+            resultBox.className = 'result-box ' + (type === 'win' ? 'win' : 'gameover');
+            resultLabel.textContent = type === 'win' ? '🏆 WIN' : '💀 GAME OVER';
+            resultImg.src = photoUrl;
+            resultMsg.textContent = message;
+            showScene('scene-result');
+            if (type === 'win') sound.win();
+            else sound.lose();
+        }
+
+        suspectBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                sound.click();
+                const suspect = this.getAttribute('data-suspect');
+                const photos = {
+                    slender: 'gameover.jpg',
+                    petrushka: 'gameover.jpg',
+                    brother: 'win.jpg'
+                };
+                const messages = {
+                    slender: 'Вы выбрали не того — головорезы Ванька настигли вас...',
+                    petrushka: 'Вы выбрали не того — Петрушка украл ваши гемы в Brawl Stars!',
+                    brother: 'Вы сделали правильный выбор! Ванёк доволен! 🎉'
+                };
+                suspectBtns.forEach(b => b.disabled = true);
+                if (suspect === 'brother') {
+                    showResult('win', photos.brother, messages.brother);
+                } else {
+                    showResult('gameover', photos.slender, messages[suspect]);
+                }
+            });
+        });
+
+        document.getElementById('btn-restart').addEventListener('click', function() {
+            sound.click();
+            suspectBtns.forEach(b => b.disabled = false);
+            showScene('scene-start');
+            resultBox.className = 'result-box';
+        });
+
+        showScene('scene-start');
+    })();
+</script>
+
+</body>
+</html>
